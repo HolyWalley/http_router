@@ -6,8 +6,13 @@ class HttpRouter
     alias_method :called?, :called
 
     def initialize(path, rack_request)
+      major, minor, = RUBY_VERSION.split('.')
+
       @rack_request = rack_request
-      @path = URI.unescape(path).split(/\//)
+
+      escaper = major.to_i > 2 || (major.to_i == 2 && minor.to_i >= 7) ? CGI : URI
+
+      @path = escaper.unescape(path).split(/\//)
       @path.shift if @path.first == ''
       @path.push('') if path[-1] == ?/
       @extra_env = {}
